@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Memorama VR</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+</head>
+
+<body>
+
+<a-scene>
+
+<a-assets>
+
+<img id="img1" src="aimep3.jpg">
+<img id="img2" src="enemigosdemexico.jpg">
+<img id="img3" src="juan.jpg">
+<img id="img4" src="karla.jpg">
+<img id="img5" src="trump.jpg">
+<img id="img6" src="angela.jpg">
+
+<audio id="musica" src="sonido.mp3"></audio>
+<audio id="voltear" src="voltear.mp3"></audio>
+<audio id="acierto" src="acierto.mp3"></audio>
+<audio id="error" src="fa.mp3"></audio>
+
+</a-assets>
+
+<a-sky color="#111"></a-sky>
+
+<!-- MUSICA DE FONDO -->
+<a-entity sound="src: #musica; autoplay: true; loop: true; volume: 0.5"></a-entity>
+
+<!-- PISO -->
+<a-plane position="0 -1 -4" rotation="-90 0 0" width="14" height="14" color="#7BC8A4"></a-plane>
+
+<!-- CONTADOR -->
+<a-text 
+id="contador"
+value="Pares: 0"
+position="-1 4 -4"
+color="white"
+width="6">
+</a-text>
+
+<!-- MEMORAMA -->
+
+<!-- FILA 1 -->
+<a-plane class="carta interactivo" position="-3 4 -6" width="1.5" height="1.5" color="blue" data-id="1" data-img="#img1"></a-plane>
+<a-plane class="carta interactivo" position="-1 4 -6" width="1.5" height="1.5" color="blue" data-id="2" data-img="#img2"></a-plane>
+<a-plane class="carta interactivo" position="1 4 -6" width="1.5" height="1.5" color="blue" data-id="3" data-img="#img3"></a-plane>
+<a-plane class="carta interactivo" position="3 4 -6" width="1.5" height="1.5" color="blue" data-id="4" data-img="#img4"></a-plane>
+
+<!-- FILA 2 -->
+<a-plane class="carta interactivo" position="-3 2 -6" width="1.5" height="1.5" color="blue" data-id="5" data-img="#img5"></a-plane>
+<a-plane class="carta interactivo" position="-1 2 -6" width="1.5" height="1.5" color="blue" data-id="6" data-img="#img6"></a-plane>
+<a-plane class="carta interactivo" position="1 2 -6" width="1.5" height="1.5" color="blue" data-id="1" data-img="#img1"></a-plane>
+<a-plane class="carta interactivo" position="3 2 -6" width="1.5" height="1.5" color="blue" data-id="2" data-img="#img2"></a-plane>
+
+<!-- FILA 3 -->
+<a-plane class="carta interactivo" position="-3 0 -6" width="1.5" height="1.5" color="blue" data-id="3" data-img="#img3"></a-plane>
+<a-plane class="carta interactivo" position="-1 0 -6" width="1.5" height="1.5" color="blue" data-id="4" data-img="#img4"></a-plane>
+<a-plane class="carta interactivo" position="1 0 -6" width="1.5" height="1.5" color="blue" data-id="5" data-img="#img5"></a-plane>
+<a-plane class="carta interactivo" position="3 0 -6" width="1.5" height="1.5" color="blue" data-id="6" data-img="#img6"></a-plane>
+
+
+<!-- CAMARA -->
+<a-entity camera look-controls position="0 1.6 0">
+<a-cursor color="yellow" raycaster="objects: .interactivo"></a-cursor>
+</a-entity>
+
+</a-scene>
+
+
+<script>
+
+let seleccionadas = [];
+let bloqueo = false;
+let pares = 0;
+let totalPares = 6;
+
+const cartas = document.querySelectorAll(".carta");
+const contador = document.querySelector("#contador");
+
+function reiniciarJuego(){
+
+pares = 0;
+contador.setAttribute("value","Pares: 0");
+
+cartas.forEach(carta=>{
+carta.removeAttribute("src");
+carta.setAttribute("color","blue");
+});
+
+seleccionadas = [];
+bloqueo = false;
+
+}
+
+cartas.forEach(function(carta){
+
+let temporizador;
+
+carta.addEventListener("mouseenter", function(){
+
+temporizador = setTimeout(function(){
+
+if(bloqueo) return;
+if(carta.getAttribute("src")) return;
+
+carta.setAttribute("src", carta.dataset.img);
+carta.setAttribute("color","white");
+
+document.querySelector("#voltear").play();
+
+seleccionadas.push(carta);
+
+if(seleccionadas.length == 2){
+
+bloqueo = true;
+
+let id1 = seleccionadas[0].dataset.id;
+let id2 = seleccionadas[1].dataset.id;
+
+if(id1 == id2){
+
+document.querySelector("#acierto").play();
+
+pares++;
+contador.setAttribute("value","Pares: "+pares);
+
+seleccionadas = [];
+bloqueo = false;
+
+if(pares == totalPares){
+
+setTimeout(function(){
+
+alert("🎉 GANASTE 🎉");
+reiniciarJuego();
+
+},1000);
+
+}
+
+}else{
+
+document.querySelector("#error").play();
+
+setTimeout(function(){
+
+seleccionadas[0].removeAttribute("src");
+seleccionadas[1].removeAttribute("src");
+
+seleccionadas[0].setAttribute("color","blue");
+seleccionadas[1].setAttribute("color","blue");
+
+seleccionadas = [];
+bloqueo = false;
+
+},1200);
+
+}
+
+}
+
+},3000);
+
+});
+
+carta.addEventListener("mouseleave", function(){
+
+clearTimeout(temporizador);
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
